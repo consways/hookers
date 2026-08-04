@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -59,10 +59,18 @@
           body: JSON.stringify(formData),
         });
 
-        const data = await response.json();
+        let data;
+        let bodyText;
+
+        try {
+          data = await response.json();
+        } catch (jsonError) {
+          bodyText = await response.text();
+        }
 
         if (!response.ok) {
-          throw new Error(data.error || 'Submission failed.');
+          const errorMessage = (data && data.error) || bodyText || 'Submission failed.';
+          throw new Error(errorMessage);
         }
 
         messageDiv.textContent = 'Saved successfully! ID: ' + data.insertedId;
