@@ -20,14 +20,14 @@
   <div class="form-container">
     <h1>Submit Server Info</h1>
     <form id="serverForm">
-      <label for="Name">Name</label>
-      <input id="Name" name="Name" type="text" required />
+      <label for="name">Name</label>
+      <input id="name" name="name" type="text" required />
 
-      <label for="ServerIP">ServerIP</label>
-      <input id="ServerIP" name="ServerIP" type="text" required />
+      <label for="serverIP">Server IP</label>
+      <input id="serverIP" name="serverIP" type="text" required />
 
-      <label for="URL">URL</label>
-      <input id="URL" name="URL" type="url" required />
+      <label for="url">URL</label>
+      <input id="url" name="url" type="url" required />
 
       <button type="submit" id="submitBtn">Submit</button>
     </form>
@@ -47,9 +47,9 @@
       messageDiv.className = 'message';
 
       const formData = {
-        Name: document.getElementById('Name').value.trim(),
-        ServerIP: document.getElementById('ServerIP').value.trim(),
-        URL: document.getElementById('URL').value.trim(),
+        name: document.getElementById('name').value.trim(),
+        serverIP: document.getElementById('serverIP').value.trim(),
+        url: document.getElementById('url').value.trim(),
       };
 
       try {
