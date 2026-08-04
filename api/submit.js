@@ -32,13 +32,20 @@ async function connectToDatabase() {
   }
 
   const connectionString = ensureTlsOnSrv(uri);
-  const client = new MongoClient(connectionString, {
+  const isSrv = connectionString.startsWith('mongodb+srv://');
+  const clientOptions = {
     serverApi: {
       version: '1',
       strict: true,
       deprecationErrors: true,
     },
-  });
+  };
+
+  if (isSrv) {
+    clientOptions.tls = true;
+  }
+
+  const client = new MongoClient(connectionString, clientOptions);
 
   await client.connect();
   const db = client.db(dbName);
@@ -52,16 +59,16 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  const { Name, ServerIP, URL } = req.body;
+  const { name, serverIP, url } = req.body;
 
-  if (!Name || !ServerIP || !URL) {
-    return res.status(400).json({ error: 'Name, ServerIP, and URL are required.' });
+  if (!name || !serverIP || !url) {
+    return res.status(400).json({ error: 'name, serverIP, and url are required.' });
   }
 
   try {
     const { db } = await connectToDatabase();
     const collection = db.collection(collectionName);
-    const result = await collection.insertOne({ Name, ServerIP, URL, createdAt: new Date() });
+    const result = await collection.insertOne({ name, serverIP, url, createdAt: new Date() });
     return res.status(200).json({ success: true, insertedId: result.insertedId });
   } catch (error) {
     console.error('MongoDB error:', error);
