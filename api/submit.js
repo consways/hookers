@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb';
+const { MongoClient } = require('mongodb');
 
 const rawUri = process.env.MONGODB_URI;
 const uri = rawUri ? rawUri.trim().replace(/^['"]|['"]$/g, '') : '';
@@ -6,9 +6,23 @@ const rawDbName = process.env.MONGODB_DB;
 const dbName = rawDbName ? rawDbName.trim().replace(/^['"]|['"]$/g, '') : 'Hook';
 const rawCollectionName = process.env.MONGODB_COLLECTION;
 const collectionName = rawCollectionName ? rawCollectionName.trim().replace(/^['"]|['"]$/g, '') : 'Hook';
+const debug = process.env.DEBUG || process.env.NODE_ENV !== 'production';
 
 let cachedClient = null;
 let cachedDb = null;
+
+function ensureTlsOnSrv(uriString) {
+  try {
+    const url = new URL(uriString);
+    if (url.protocol === 'mongodb+srv:' && !url.searchParams.has('tls')) {
+      url.searchParams.set('tls', 'true');
+      return url.toString();
+    }
+  } catch (err) {
+    // ignore invalid URL parsing; the driver will handle it
+  }
+  return uriString;
+}
 
 async function connectToDatabase() {
   if (cachedClient && cachedDb) return { client: cachedClient, db: cachedDb };
@@ -17,7 +31,8 @@ async function connectToDatabase() {
     throw new Error('MONGODB_URI environment variable is not set or is empty. Set it in Vercel project settings.');
   }
 
-  const client = new MongoClient(uri, {
+  const connectionString = ensureTlsOnSrv(uri);
+  const client = new MongoClient(connectionString, {
     serverApi: {
       version: '1',
       strict: true,
@@ -32,7 +47,7 @@ async function connectToDatabase() {
   return { client, db };
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
@@ -50,6 +65,10 @@ export default async function handler(req, res) {
     return res.status(200).json({ success: true, insertedId: result.insertedId });
   } catch (error) {
     console.error('MongoDB error:', error);
-    return res.status(500).json({ error: error.message || 'Unable to save data.' });
+    const response = { error: error.message || 'Unable to save data.' };
+    if (debug && error.stack) {
+      response.stack = error.stack;
+    }
+    return res.status(500).json(response);
   }
-}
+};
