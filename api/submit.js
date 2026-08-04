@@ -1,27 +1,42 @@
 const { MongoClient } = require('mongodb');
 
+function normalizeEnvValue(value) {
+  if (!value || typeof value !== 'string') return '';
+  return value.trim().replace(/^['"]|['"]$/g, '');
+}
+
 const rawUri = process.env.MONGODB_URI;
-const uri = rawUri ? rawUri.trim().replace(/^['"]|['"]$/g, '') : '';
+const uri = normalizeEnvValue(rawUri);
 const rawDbName = process.env.MONGODB_DB;
-const dbName = rawDbName ? rawDbName.trim().replace(/^['"]|['"]$/g, '') : 'Hook';
+const dbName = normalizeEnvValue(rawDbName) || 'Hook';
 const rawCollectionName = process.env.MONGODB_COLLECTION;
-const collectionName = rawCollectionName ? rawCollectionName.trim().replace(/^['"]|['"]$/g, '') : 'Hook';
+const collectionName = normalizeEnvValue(rawCollectionName) || 'Hook';
 const debug = process.env.DEBUG || process.env.NODE_ENV !== 'production';
 
 let cachedClient = null;
 let cachedDb = null;
 
-function ensureTlsOnSrv(uriString) {
+function buildClientOptions(connectionString) {
+  const clientOptions = {
+    serverApi: {
+      version: '1',
+      strict: true,
+      deprecationErrors: true,
+    },
+  };
+
   try {
-    const url = new URL(uriString);
-    if (url.protocol === 'mongodb+srv:' && !url.searchParams.has('tls')) {
-      url.searchParams.set('tls', 'true');
-      return url.toString();
+    const parsedUrl = new URL(connectionString);
+    const hasExplicitTls = parsedUrl.searchParams.has('tls') || parsedUrl.searchParams.has('ssl');
+
+    if (!hasExplicitTls && (parsedUrl.protocol === 'mongodb+srv:' || parsedUrl.hostname.includes('mongodb.net'))) {
+      clientOptions.tls = true;
     }
-  } catch (err) {
-    // ignore invalid URL parsing; the driver will handle it
+  } catch (error) {
+    // Leave the MongoDB driver to validate the URI if it is malformed.
   }
-  return uriString;
+
+  return clientOptions;
 }
 
 async function connectToDatabase() {
@@ -31,20 +46,19 @@ async function connectToDatabase() {
     throw new Error('MONGODB_URI environment variable is not set or is empty. Set it in Vercel project settings.');
   }
 
-  const connectionString = ensureTlsOnSrv(uri);
-  const isSrv = connectionString.startsWith('mongodb+srv://');
-  const clientOptions = {
-    serverApi: {
-      version: '1',
-      strict: true,
-      deprecationErrors: true,
-    },
-  };
+  let connectionString = uri;
+  try {
+    const parsedUrl = new URL(uri);
+    const hasExplicitTls = parsedUrl.searchParams.has('tls') || parsedUrl.searchParams.has('ssl');
 
-  if (isSrv) {
-    clientOptions.tls = true;
+    if (parsedUrl.protocol === 'mongodb+srv:' && !hasExplicitTls) {
+      connectionString = parsedUrl.toString();
+    }
+  } catch (error) {
+    // Ignore URL parsing errors and let the MongoDB driver validate the raw URI.
   }
 
+  const clientOptions = buildClientOptions(connectionString);
   const client = new MongoClient(connectionString, clientOptions);
 
   await client.connect();
