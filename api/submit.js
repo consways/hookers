@@ -1,8 +1,11 @@
 import { MongoClient } from 'mongodb';
 
-const uri = process.env.MONGODB_URI;
-const dbName = process.env.MONGODB_DB || 'Hook';
-const collectionName = process.env.MONGODB_COLLECTION || 'Hook';
+const rawUri = process.env.MONGODB_URI;
+const uri = rawUri ? rawUri.trim().replace(/^['"]|['"]$/g, '') : '';
+const rawDbName = process.env.MONGODB_DB;
+const dbName = rawDbName ? rawDbName.trim().replace(/^['"]|['"]$/g, '') : 'Hook';
+const rawCollectionName = process.env.MONGODB_COLLECTION;
+const collectionName = rawCollectionName ? rawCollectionName.trim().replace(/^['"]|['"]$/g, '') : 'Hook';
 
 let cachedClient = null;
 let cachedDb = null;
