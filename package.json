@@ -1,0 +1,8 @@
+{
+  "name": "hook-site",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "mongodb": "^5.12.0"
+  }
+}

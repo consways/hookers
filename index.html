@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hook: Vote Manager</title>
+    <link id="favicon" rel="icon" href="img/icon.png" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link id="preload-icon" rel="preload" href="img/icon.png" as="image" fetchpriority="high">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <img src="img/icon.png" data-i18n="voteManagerIconAlt" data-i18n-attr="alt" width="50" height="50" loading="eager">
+            <div class="tiered-header">
+            <h1>Hook</h1>
+            <h2 data-i18n="voteManagerHeader">Vote Manager</h2>
+            </div>
+        </div>
+        <div class="header-right">
+        </div>
+    </header>
+        <div class="ticker" aria-label="Server status ticker">
+        <div class="ticker__track">
+            <div id="server-1" class="cell"><span class="left">SERVER NAME</span><span class="right">• 00</span></div>
+            <div id="server-2" class="cell"><span class="left">SERVER NAME</span><span class="right">• 00</span></div>
+            <div id="server-3" class="cell"><span class="left">SERVER NAME</span><span class="right">• 00</span></div>
+            <div id="server-4" class="cell"><span class="left">SERVER NAME</span><span class="right">• 00</span></div>
+            <div id="server-5" class="cell"><span class="left">SERVER NAME</span><span class="right">• 00</span></div>
+            <div id="server-6" class="cell"><span class="left">SERVER NAME</span><span class="right">• 00</span></div>
+            <div id="server-7" class="cell"><span class="left">SERVER NAME</span><span class="right">• 00</span></div>
+            <div id="server-8" class="cell"><span class="left">SERVER NAME</span><span class="right">• 00</span></div>
+            <div id="server-9" class="cell"><span class="left">SERVER NAME</span><span class="right">• 00</span></div>
+            <div id="server-10" class="cell"><span class="left">SERVER NAME</span><span class="right">• 00</span></div>
+            <div id="server-11" class="cell"><span class="left">SERVER NAME</span><span class="right">• 00</span></div>
+            <div id="server-12" class="cell"><span class="left">SERVER NAME</span><span class="right">• 00</span></div>
+        </div>
+        </div>
+        <div class="hero">
+            <div class="hero-content">
+            <h1>Welcome to the Vote Manager</h1>
+            <p>Manage your votes and track your progress with our easy-to-use interface.</p>
+            </div>
+        </div>
+    <section>
+    </section>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const track = document.querySelector('.ticker__track');
+            if (!track) return;
+
+            const cells = Array.from(track.children);
+            cells.forEach(cell => {
+                const clone = cell.cloneNode(true);
+                clone.removeAttribute('id');
+                track.appendChild(clone);
+            });
+        });
+    </script>
+</body>
+</html>
