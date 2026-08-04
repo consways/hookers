@@ -10,8 +10,8 @@ let cachedDb = null;
 async function connectToDatabase() {
   if (cachedClient && cachedDb) return { client: cachedClient, db: cachedDb };
 
-  if (!uri) {
-    throw new Error('MONGODB_URI environment variable is not set.');
+  if (!uri || !uri.trim()) {
+    throw new Error('MONGODB_URI environment variable is not set or is empty. Set it in Vercel project settings.');
   }
 
   const client = new MongoClient(uri, {
@@ -47,6 +47,6 @@ export default async function handler(req, res) {
     return res.status(200).json({ success: true, insertedId: result.insertedId });
   } catch (error) {
     console.error('MongoDB error:', error);
-    return res.status(500).json({ error: 'Unable to save data.' });
+    return res.status(500).json({ error: error.message || 'Unable to save data.' });
   }
 }
