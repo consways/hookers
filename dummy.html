@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hook Random Entry Test</title>
+  <style>
+    body {
+      margin: 0;
+      background: #f8fafc;
+      color: #0f172a;
+      font-family: Arial, sans-serif;
+      padding: 32px 16px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: 0 12px 28px rgba(15,23,42,0.08);
+    }
+    h1 {
+      margin-top: 0;
+      margin-bottom: 16px;
+    }
+    button {
+      padding: 12px 18px;
+      border: none;
+      border-radius: 10px;
+      background: #2563eb;
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 18px;
+      border-radius: 12px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      margin-top: 18px;
+      min-height: 180px;
+    }
+    .status {
+      margin-bottom: 16px;
+      color: #475569;
+      font-weight: 600;
+    }
+    .link {
+      display: inline-block;
+      margin-top: 16px;
+      color: #1d4ed8;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Random Entry Test</h1>
+    <div class="status" id="status">Loading random entry...</div>
+    <button id="loadButton" type="button">Load random entry</button>
+    <pre id="output">{}</pre>
+    <a class="link" href="/db-view.html">Back to JSON entries</a>
+  </div>
+
+  <script>
+    const status = document.getElementById('status');
+    const output = document.getElementById('output');
+
+    async function loadRandomEntry() {
+      status.textContent = 'Fetching a random document...';
+
+      try {
+        const response = await fetch('/api/random');
+        if (!response.ok) {
+          throw new Error('Request failed.');
+        }
+
+        const data = await response.json();
+        status.textContent = data.message || 'Random entry loaded.';
+        output.textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        status.textContent = 'Unable to load random entry.';
+        output.textContent = JSON.stringify({ error: error.message }, null, 2);
+      }
+    }
+
+    document.getElementById('loadButton').addEventListener('click', loadRandomEntry);
+    loadRandomEntry();
+  </script>
+</body>
+</html>
